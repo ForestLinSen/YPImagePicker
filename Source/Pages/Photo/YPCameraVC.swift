@@ -26,14 +26,20 @@ internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, 
         self.v = YPCameraView(overlayView: YPConfig.overlayView)
         super.init(nibName: nil, bundle: nil)
 
-        title = YPConfig.wordings.cameraTitle
-        navigationController?.navigationBar.setTitleFont(font: YPConfig.fonts.navigationBarTitleFont)
+//        title = YPConfig.wordings.cameraTitle
+//        navigationController?.navigationBar.setTitleFont(font: YPConfig.fonts.navigationBarTitleFont)
+
         
         YPDeviceOrientationHelper.shared.startDeviceOrientationNotifier { _ in }
     }
     
     internal required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
     }
     
     deinit {
@@ -75,6 +81,9 @@ internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, 
                     self?.updateFlashButtonUI()
                 }
             })
+            
+            print("Debug: Camera view start")
+            
         }
     }
 
@@ -122,6 +131,7 @@ internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, 
     
     @objc
     func flipButtonTapped() {
+        print("Debug: flip button tapped")
         self.photoCapture.flipCamera {
             self.updateFlashButtonUI()
         }
@@ -138,6 +148,11 @@ internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, 
         // Prevent from tapping multiple times in a row
         // causing a crash
         v.shotButton.isEnabled = false
+        
+        // TODO: - Add cancel button to the camera and the
+        let testView = UIView(frame: CGRect(x: 0, y: 0, width: 200, height: 200))
+        testView.backgroundColor = .systemRed
+        self.v.addSubview(testView)
 
         photoCapture.shoot { imageData in
             

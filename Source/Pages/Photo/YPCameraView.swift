@@ -12,12 +12,16 @@ import Stevia
 internal class YPCameraView: UIView, UIGestureRecognizerDelegate {
     let focusView = UIView(frame: CGRect(x: 0, y: 0, width: 90, height: 90))
     let previewViewContainer = UIView()
-    let buttonsContainer = UIView()
+//    let buttonsContainer = UIView()
     let flipButton = UIButton()
     let shotButton = UIButton()
     let flashButton = UIButton()
     let timeElapsedLabel = UILabel()
     let progressBar = UIProgressView()
+    
+    let recentMedia = UIButton()
+    
+    let bottomPadding = 60
     
     convenience init(overlayView: UIView? = nil) {
         self.init(frame: .zero)
@@ -31,9 +35,7 @@ internal class YPCameraView: UIView, UIGestureRecognizerDelegate {
                 timeElapsedLabel,
                 flashButton,
                 flipButton,
-                buttonsContainer.subviews(
-                    shotButton
-                )
+                shotButton
             )
         } else {
             // View Hierarchy
@@ -42,28 +44,33 @@ internal class YPCameraView: UIView, UIGestureRecognizerDelegate {
                 progressBar,
                 timeElapsedLabel,
                 flashButton,
-                flipButton,
-                buttonsContainer.subviews(
-                    shotButton
-                )
+                recentMedia,
+                shotButton,
+                flipButton
+
             )
         }
         
         // Layout
         let isIphone4 = UIScreen.main.bounds.height == 480
         let sideMargin: CGFloat = isIphone4 ? 20 : 0
+        previewViewContainer.height(UIScreen.main.bounds.height)
+        shotButton.Bottom == previewViewContainer.Bottom - bottomPadding
+        flashButton.Bottom == previewViewContainer.Bottom - bottomPadding
+        flipButton.Bottom == previewViewContainer.Bottom - bottomPadding
+        recentMedia.Bottom == previewViewContainer.Bottom - bottomPadding
+        
         if YPConfig.onlySquareImagesFromCamera {
             layout(
                 0,
                 |-sideMargin-previewViewContainer-sideMargin-|,
                 -2,
                 |progressBar|,
-                0,
-                |buttonsContainer|,
                 0
             )
             
-            previewViewContainer.heightEqualsWidth()
+//            previewViewContainer.heightEqualsWidth()
+            
         } else {
             layout(
                 0,
@@ -72,12 +79,9 @@ internal class YPCameraView: UIView, UIGestureRecognizerDelegate {
                 |progressBar|,
                 0
             )
+            previewViewContainer.height(UIScreen.main.bounds.width)
+//            previewViewContainer.fillContainer()
             
-            previewViewContainer.fillContainer()
-            
-            buttonsContainer.fillHorizontally()
-            buttonsContainer.height(100)
-            buttonsContainer.Bottom == previewViewContainer.Bottom - 50
         }
         
         overlayView?.followEdges(previewViewContainer)
@@ -88,10 +92,13 @@ internal class YPCameraView: UIView, UIGestureRecognizerDelegate {
         flipButton.size(42)-(15+sideMargin)-|
         flipButton.Bottom == previewViewContainer.Bottom - 15
         
-        timeElapsedLabel-(15+sideMargin)-|
-        timeElapsedLabel.Top == previewViewContainer.Top + 15
+        |-(15+sideMargin)-recentMedia.size(42)
+        recentMedia.Bottom == previewViewContainer.Bottom - 15
         
-        shotButton.centerVertically()
+        timeElapsedLabel-(15+sideMargin)-|
+        timeElapsedLabel.Top == safeAreaLayoutGuide.Top
+        
+        //shotButton.centerVertically()
         shotButton.size(84).centerHorizontally()
         
         // Style
@@ -109,6 +116,7 @@ internal class YPCameraView: UIView, UIGestureRecognizerDelegate {
         }
         flashButton.setImage(YPConfig.icons.flashOffIcon, for: .normal)
         flipButton.setImage(YPConfig.icons.loopIcon, for: .normal)
+        recentMedia.backgroundColor = .systemRed
         shotButton.setImage(YPConfig.icons.capturePhotoImage, for: .normal)
     }
 }

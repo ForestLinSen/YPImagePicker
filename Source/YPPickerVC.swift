@@ -36,7 +36,7 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
         case video
     }
     
-    private var libraryVC: YPLibraryVC?
+    private var libraryVC: YPLibraryVC? = YPLibraryVC()
     private var cameraVC: YPCameraVC?
     private var videoVC: YPVideoCaptureVC?
     
@@ -57,14 +57,17 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
         }
         
         // Library
-        if YPConfig.screens.contains(.library) {
-            libraryVC = YPLibraryVC()
-            libraryVC?.delegate = self
-        }
+//        if YPConfig.screens.contains(.library) {
+//            libraryVC = YPLibraryVC()
+//            libraryVC?.delegate = self
+//        }
         
         // Camera
         if YPConfig.screens.contains(.photo) {
             cameraVC = YPCameraVC()
+            
+
+            
             cameraVC?.didCapturePhoto = { [weak self] img in
                 self?.didSelectItems?([YPMediaItem.photo(p: YPMediaPhoto(image: img,
                                                                          fromCamera: true))])
@@ -73,7 +76,17 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
         
         // Video
         if YPConfig.screens.contains(.video) {
-            videoVC = YPVideoCaptureVC()
+            
+            // Set up the library vc
+            libraryVC?.done = done
+            libraryVC?.setAlbum(YPAlbum())
+            libraryVC?.delegate = self
+            libraryVC?.doAfterLibraryPermissionCheck { [weak libraryVC] in
+                libraryVC?.initialize()
+            }
+
+            
+            videoVC = YPVideoCaptureVC(libraryVC: libraryVC!)
             videoVC?.didCaptureVideo = { [weak self] videoURL in
                 self?.didSelectItems?([YPMediaItem
                                         .video(v: YPMediaVideo(thumbnail: thumbnailFromVideoPath(videoURL),
@@ -171,6 +184,8 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
             }
         } else if let cameraVC = vc as? YPCameraVC {
             cameraVC.start()
+            
+
         } else if let videoVC = vc as? YPVideoCaptureVC {
             videoVC.start()
         }
@@ -276,6 +291,7 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
                                                                style: .plain,
                                                                target: self,
                                                                action: #selector(close))
+            
         }
         switch mode {
         case .library:
@@ -294,10 +310,17 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
             navigationItem.titleView = nil
             title = cameraVC?.title
             navigationItem.rightBarButtonItem = nil
+
         case .video:
             navigationItem.titleView = nil
             title = videoVC?.title
             navigationItem.rightBarButtonItem = nil
+            
+            let cancelButton = UIButton(frame: CGRect(x: 10, y: 20, width: 100, height: 100))
+            cancelButton.setImage(UIImage(named: "cancel"), for: .normal)
+            //cancelButton.setTitle("Cancel", for: .normal)
+            cancelButton.addTarget(self, action: #selector(close), for: .touchUpInside)
+            videoVC?.v.addSubview(cancelButton)
         }
 
         navigationItem.rightBarButtonItem?.setFont(font: YPConfig.fonts.rightBarButtonFont, forState: .normal)
@@ -319,16 +342,25 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     func done() {
         guard let libraryVC = libraryVC else { ypLog("YPLibraryVC deallocated"); return }
         
-        if mode == .library {
-            libraryVC.selectedMedia(photoCallback: { photo in
-                self.didSelectItems?([YPMediaItem.photo(p: photo)])
-            }, videoCallback: { video in
-                self.didSelectItems?([YPMediaItem
-                                        .video(v: video)])
-            }, multipleItemsCallback: { items in
-                self.didSelectItems?(items)
-            })
-        }
+        libraryVC.selectedMedia(photoCallback: { photo in
+            self.didSelectItems?([YPMediaItem.photo(p: photo)])
+        }, videoCallback: { video in
+            self.didSelectItems?([YPMediaItem
+                                    .video(v: video)])
+        }, multipleItemsCallback: { items in
+            self.didSelectItems?(items)
+        })
+        
+//        if mode == .library {
+//            libraryVC.selectedMedia(photoCallback: { photo in
+//                self.didSelectItems?([YPMediaItem.photo(p: photo)])
+//            }, videoCallback: { video in
+//                self.didSelectItems?([YPMediaItem
+//                                        .video(v: video)])
+//            }, multipleItemsCallback: { items in
+//                self.didSelectItems?(items)
+//            })
+//        }
     }
     
     func stopAll() {

@@ -114,6 +114,7 @@ public final class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         startPlaybackTimeChecker()
         
         super.viewDidAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: true)
     }
     
     public override func viewWillDisappear(_ animated: Bool) {

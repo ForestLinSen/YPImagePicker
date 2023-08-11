@@ -12,14 +12,16 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
     var didCaptureVideo: ((URL) -> Void)?
     
     private let videoHelper = YPVideoCaptureHelper()
-    private let v = YPCameraView(overlayView: nil)
+    weak var libraryVC: YPLibraryVC?
+    let v = YPCameraView(overlayView: nil)
     private var viewState = ViewState()
     
     // MARK: - Init
     
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
-    required init() {
+    required init(libraryVC: YPLibraryVC) {
+        self.libraryVC = libraryVC
         super.init(nibName: nil, bundle: nil)
         title = YPConfig.wordings.videoTitle
         videoHelper.didCaptureVideo = { [weak self] videoURL in
@@ -52,6 +54,12 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
         let pinchRecongizer = UIPinchGestureRecognizer(target: self, action: #selector(self.pinch(_:)))
         v.previewViewContainer.addGestureRecognizer(pinchRecongizer)
     }
+    
+    // Hide the NavigationBar when before click the record button
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
 
     func start() {
         self.videoHelper.start(previewView: v.previewViewContainer,
@@ -82,6 +90,7 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
         v.flashButton.addTarget(self, action: #selector(flashButtonTapped), for: .touchUpInside)
         v.shotButton.addTarget(self, action: #selector(shotButtonTapped), for: .touchUpInside)
         v.flipButton.addTarget(self, action: #selector(flipButtonTapped), for: .touchUpInside)
+        v.recentMedia.addTarget(self, action: #selector(shotLibrary), for: .touchUpInside)
     }
     
     // MARK: - Flip Camera
@@ -114,6 +123,31 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
         }
     }
     
+    // MARK: - Show the library
+    @objc
+    func shotLibrary() {
+        guard let libraryVC = libraryVC else { return }
+        
+        libraryVC.title = "Test"
+        libraryVC.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next",
+                                                                       style: .plain,
+                                                                       target: self,
+                                                                      action: #selector(didTapNextButton))
+        libraryVC.isMultipleSelectionEnabled = false
+
+        let nav = UINavigationController(rootViewController: libraryVC)
+        nav.navigationBar.backgroundColor = .systemGreen
+
+        present(nav, animated: true)
+    }
+    
+    @objc
+    private func didTapNextButton() {
+        guard let done = libraryVC?.done else { return }
+        done()
+        dismiss(animated: true)
+    }
+    
     private func toggleRecording() {
         videoHelper.isRecording ? stopRecording() : startRecording()
     }
@@ -131,18 +165,30 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
     }
     
     private func stopRecording() {
+        
+        print("Debug: stop recording")
+        
+        
         // Reset screen always on to false since the need no longer exists
         DispatchQueue.main.async {
             UIApplication.shared.isIdleTimerDisabled = false
+            
         }
         
         videoHelper.stopRecording()
         updateState {
             $0.isRecording = false
+            
         }
+        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+//            self?.navigationController?.setNavigationBarHidden(false, animated: true)
+//        }
     }
 
     public func stopCamera() {
+        print("Debug: stop camera")
+        
         videoHelper.stopCamera()
     }
     

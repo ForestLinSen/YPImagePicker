@@ -117,11 +117,11 @@ class ExampleViewController: UIViewController {
 
         /* Defines which screen is shown at launch. Video mode will only work if `showsVideo = true`.
            Default value is `.photo` */
-        config.startOnScreen = .library
+        config.startOnScreen = .video
 
         /* Defines which screens are shown at launch, and their order.
            Default value is `[.library, .photo]` */
-        config.screens = [.library, .photo, .video]
+        config.screens = [.video]
 
         /* Can forbid the items with very big height with this property */
         config.library.minWidthForItem = UIScreen.main.bounds.width * 0.8
@@ -184,6 +184,9 @@ class ExampleViewController: UIViewController {
         //
         //config.library.options = options
 
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.video.rawValue)
+        config.library.options = fetchOptions
         config.library.preselectedItems = selectedItems
 
 

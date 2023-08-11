@@ -19,23 +19,23 @@ final class YPBottomPagerView: UIView {
         backgroundColor = .offWhiteOrBlack
         
         subviews(
-            scrollView,
-            header
+            scrollView
+//            header
         )
         
         layout(
             0,
             |scrollView|,
-            0,
-            |header| ~ 44
+            0
+//            |header| ~ 44
         )
         
-        if #available(iOS 11.0, *) {
-            header.Bottom == safeAreaLayoutGuide.Bottom
-        } else {
-            header.bottom(0)
-        }
-        header.heightConstraint?.constant = (YPConfig.hidesBottomBar || (YPConfig.screens.count == 1)) ? 0 : 44
+//        if #available(iOS 11.0, *) {
+//            header.Bottom == safeAreaLayoutGuide.Bottom
+//        } else {
+//            header.bottom(0)
+//        }
+//        header.heightConstraint?.constant = (YPConfig.hidesBottomBar || (YPConfig.screens.count == 1)) ? 0 : 44
         
         clipsToBounds = false
         setupScrollView()

@@ -20,6 +20,8 @@ internal final class YPLibraryVC: UIViewController, YPPermissionCheckable {
     internal var currentlySelectedIndex: Int = 0
     internal let panGestureHelper = PanGestureHelper()
     internal var isInitialized = false
+    
+    var done: (() -> Void)?
 
     // MARK: - Init
 
@@ -38,12 +40,15 @@ internal final class YPLibraryVC: UIViewController, YPPermissionCheckable {
     
     func initialize() {
         guard isInitialized == false else {
+            print("Debug: didn't initialise the library vc")
             return
         }
 
         defer {
             isInitialized = true
         }
+        
+        print("Debug: begin to initialise library vc")
 
         mediaManager.initialize()
         mediaManager.v = v
@@ -53,6 +58,7 @@ internal final class YPLibraryVC: UIViewController, YPPermissionCheckable {
         panGestureHelper.registerForPanGesture(on: v)
         registerForTapOnPreview()
         refreshMediaRequest()
+        
 
         v.assetViewContainer.multipleSelectionButton.isHidden = !(YPConfig.library.maxNumberOfItems > 1)
         v.maxNumberWarningLabel.text = String(format: YPConfig.wordings.warningMaxItemsLimit,
@@ -138,6 +144,8 @@ internal final class YPLibraryVC: UIViewController, YPPermissionCheckable {
         if YPConfig.library.minNumberOfItems > 1 {
             multipleSelectionButtonTapped()
         }
+        
+        navigationController?.setNavigationBarHidden(false, animated: true)
     }
     
     public override func viewWillDisappear(_ animated: Bool) {
