@@ -13,6 +13,8 @@ import Photos
 internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, YPPermissionCheckable {
     var didCapturePhoto: ((UIImage) -> Void)?
     let v: YPCameraView!
+    
+    weak var libraryVC: YPLibraryVC?
 
     private let photoCapture = YPPhotoCaptureHelper()
     private var isInited = false
@@ -22,8 +24,9 @@ internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, 
         view = v
     }
 
-    internal required init() {
+    internal required init(libraryVC: YPLibraryVC) {
         self.v = YPCameraView(overlayView: YPConfig.overlayView)
+        self.libraryVC = libraryVC
         super.init(nibName: nil, bundle: nil)
 
 //        title = YPConfig.wordings.cameraTitle
@@ -53,6 +56,12 @@ internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, 
         v.flashButton.addTarget(self, action: #selector(flashButtonTapped), for: .touchUpInside)
         v.shotButton.addTarget(self, action: #selector(shotButtonTapped), for: .touchUpInside)
         v.flipButton.addTarget(self, action: #selector(flipButtonTapped), for: .touchUpInside)
+        v.recentMedia.addTarget(self, action: #selector(showLibrary), for: .touchUpInside)
+        
+        // Configure the recent media
+        self.libraryVC?.fetchThumbnailOfLatestAsset(completion: {[weak self] thumbnail in
+            self?.v.configureRecentMediaImage(thumbnail)
+        })
         
         // Prevent flip and shot button clicked at the same time
         v.shotButton.isExclusiveTouch = true
@@ -67,6 +76,30 @@ internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, 
         let pinchRecongizer = UIPinchGestureRecognizer(target: self, action: #selector(self.pinch(_:)))
         pinchRecongizer.delegate = self
         v.previewViewContainer.addGestureRecognizer(pinchRecongizer)
+    }
+    
+    @objc
+    private func showLibrary(){
+        guard let libraryVC = libraryVC else { return }
+        
+        libraryVC.title = "Recent Media"
+        libraryVC.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next",
+                                                                       style: .plain,
+                                                                       target: self,
+                                                                      action: #selector(didTapNextButton))
+        libraryVC.isMultipleSelectionEnabled = false
+
+        let nav = UINavigationController(rootViewController: libraryVC)
+        //nav.navigationBar.backgroundColor = .systemGreen
+
+        present(nav, animated: true)
+    }
+    
+    @objc
+    private func didTapNextButton() {
+        guard let done = libraryVC?.done else { return }
+        done()
+        dismiss(animated: true)
     }
     
     func start() {
@@ -151,7 +184,7 @@ internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, 
         
         // TODO: - Add cancel button to the camera and the
         let testView = UIView(frame: CGRect(x: 0, y: 0, width: 200, height: 200))
-        testView.backgroundColor = .systemRed
+        testView.backgroundColor = .systemGreen
         self.v.addSubview(testView)
 
         photoCapture.shoot { imageData in

@@ -88,7 +88,7 @@ final class YPAssetViewContainer: UIView {
         }
 
         // Multiple selection button
-        subviews(multipleSelectionButton)
+//        subviews(multipleSelectionButton)
         multipleSelectionButton.size(42).trailing(15)
         multipleSelectionButton.Bottom == self.Bottom - 15
     }

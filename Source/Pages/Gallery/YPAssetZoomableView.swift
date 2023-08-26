@@ -73,6 +73,7 @@ final class YPAssetZoomableView: UIScrollView {
             }
             
             strongSelf.videoView.setPreviewImage(preview)
+            strongSelf.videoView.pause()
             
             strongSelf.setAssetFrame(for: strongSelf.videoView, with: preview)
 

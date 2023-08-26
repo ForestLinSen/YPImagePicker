@@ -24,6 +24,9 @@ public class YPVideoView: UIView {
             return AVPlayer()
         }
         
+        print("Debug: player init")
+        player.pause()
+        
         playImageView.image = YPConfig.icons.playImage
         return player
     }
@@ -101,6 +104,7 @@ extension YPVideoView {
     
     /// Convenience func to pause or unpause video dependely of state
     public func pauseUnpause() {
+        print("Debug: pause and unpause triggered")
         (player.rate == 0.0) ? play() : pause()
     }
 

@@ -22,6 +22,7 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
     
     required init(libraryVC: YPLibraryVC) {
         self.libraryVC = libraryVC
+                
         super.init(nibName: nil, bundle: nil)
         title = YPConfig.wordings.videoTitle
         videoHelper.didCaptureVideo = { [weak self] videoURL in
@@ -46,6 +47,13 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
         setupButtons()
         linkButtons()
         
+        // Configure the recent media
+        self.libraryVC?.fetchThumbnailOfLatestAsset(completion: {[weak self] thumbnail in
+            self?.v.configureRecentMediaImage(thumbnail)
+            self?.libraryVC?.pausePlayer()
+            self?.libraryVC?.v.assetZoomableView.videoView.player.isMuted = true
+        })
+        
         // Focus
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(focusTapped(_:)))
         v.previewViewContainer.addGestureRecognizer(tapRecognizer)
@@ -53,6 +61,7 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
         // Zoom
         let pinchRecongizer = UIPinchGestureRecognizer(target: self, action: #selector(self.pinch(_:)))
         v.previewViewContainer.addGestureRecognizer(pinchRecongizer)
+        
     }
     
     // Hide the NavigationBar when before click the record button
@@ -90,7 +99,7 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
         v.flashButton.addTarget(self, action: #selector(flashButtonTapped), for: .touchUpInside)
         v.shotButton.addTarget(self, action: #selector(shotButtonTapped), for: .touchUpInside)
         v.flipButton.addTarget(self, action: #selector(flipButtonTapped), for: .touchUpInside)
-        v.recentMedia.addTarget(self, action: #selector(shotLibrary), for: .touchUpInside)
+        v.recentMedia.addTarget(self, action: #selector(showLibrary), for: .touchUpInside)
     }
     
     // MARK: - Flip Camera
@@ -125,10 +134,10 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
     
     // MARK: - Show the library
     @objc
-    func shotLibrary() {
+    func showLibrary() {
         guard let libraryVC = libraryVC else { return }
         
-        libraryVC.title = "Test"
+        libraryVC.title = "Recent Media"
         libraryVC.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next",
                                                                        style: .plain,
                                                                        target: self,
@@ -136,7 +145,7 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
         libraryVC.isMultipleSelectionEnabled = false
 
         let nav = UINavigationController(rootViewController: libraryVC)
-        nav.navigationBar.backgroundColor = .systemGreen
+        //nav.navigationBar.backgroundColor = .systemGreen
 
         present(nav, animated: true)
     }

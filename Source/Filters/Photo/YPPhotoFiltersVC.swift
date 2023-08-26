@@ -76,6 +76,8 @@ open class YPPhotoFiltersVC: UIViewController, IsMediaFilterVC, UIGestureRecogni
 
         view.backgroundColor = YPConfig.colors.filterBackgroundColor
         
+        navigationController?.setNavigationBarHidden(false, animated: true)
+        
         // Setup of Navigation Bar
         title = YPConfig.wordings.filter
         if isFromSelectionVC {

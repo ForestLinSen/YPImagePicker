@@ -119,4 +119,9 @@ internal class YPCameraView: UIView, UIGestureRecognizerDelegate {
         recentMedia.backgroundColor = .systemRed
         shotButton.setImage(YPConfig.icons.capturePhotoImage, for: .normal)
     }
+    
+    public func configureRecentMediaImage(_ image: UIImage?) {
+        guard let image = image else { return }
+        recentMedia.setImage(image, for: .normal)
+    }
 }

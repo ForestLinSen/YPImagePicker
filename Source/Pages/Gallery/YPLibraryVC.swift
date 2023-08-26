@@ -571,6 +571,23 @@ internal final class YPLibraryVC: UIViewController, YPPermissionCheckable {
         }
     }
     
+    // MARK: - Fetch the latest media
+    public func fetchThumbnailOfLatestAsset(completion: @escaping (_ thumbnail: UIImage?) -> Void) {
+        guard let latestAsset = mediaManager.getAsset(at: 0) else {
+            completion(nil)
+            return
+        }
+
+        let thumbnailSize = CGSize(width: 100, height: 100)
+        let options = PHImageRequestOptions()
+        options.isSynchronous = false
+        options.resizeMode = .fast
+        
+        mediaManager.imageManager?.requestImage(for: latestAsset, targetSize: thumbnailSize, contentMode: .aspectFill, options: options, resultHandler: { image, _ in
+            completion(image)
+        })
+    }
+    
     // MARK: - TargetSize
     
     private func targetSize(for asset: PHAsset, cropRect: CGRect) -> CGSize {

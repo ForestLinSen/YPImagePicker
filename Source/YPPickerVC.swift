@@ -64,7 +64,16 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
         
         // Camera
         if YPConfig.screens.contains(.photo) {
-            cameraVC = YPCameraVC()
+            // Set up the library vc
+            libraryVC?.done = done
+            libraryVC?.setAlbum(YPAlbum())
+            libraryVC?.delegate = self
+            libraryVC?.doAfterLibraryPermissionCheck { [weak libraryVC] in
+                libraryVC?.initialize()
+            }
+            
+            
+            cameraVC = YPCameraVC(libraryVC: libraryVC!)
             
 
             
@@ -310,6 +319,11 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
             navigationItem.titleView = nil
             title = cameraVC?.title
             navigationItem.rightBarButtonItem = nil
+            
+            let cancelButton = UIButton(frame: CGRect(x: 10, y: 20, width: 100, height: 100))
+            cancelButton.setImage(UIImage(named: "cancel"), for: .normal)
+            cancelButton.addTarget(self, action: #selector(close), for: .touchUpInside)
+            cameraVC?.v.addSubview(cancelButton)
 
         case .video:
             navigationItem.titleView = nil

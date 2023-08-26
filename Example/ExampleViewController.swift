@@ -30,7 +30,7 @@ class ExampleViewController: UIViewController {
                                             height: 100))
         button.setTitle("Pick", for: .normal)
         button.setTitleColor(.black, for: .normal)
-        button.addTarget(self, action: #selector(showPicker), for: .touchUpInside)
+        button.addTarget(self, action: #selector(showPresentOptions), for: .touchUpInside)
         return button
     }()
 
@@ -67,10 +67,33 @@ class ExampleViewController: UIViewController {
             print("No items selected yet.")
         }
     }
+    
+    // MARK: - Show options
+    @objc
+    func showPresentOptions() {
+        let alertController = UIAlertController(title: nil, message: "Do you want to take a photo or record a video", preferredStyle: .actionSheet)
+        
+        let presentPhoto = UIAlertAction(title: "Take a photo", style: .default) {[weak self] _ in
+            self?.showPicker("photo")
+        }
+        
+        let presentVideo = UIAlertAction(title: "Take a video", style: .default) {[weak self] _ in
+            self?.showPicker("video")
+        }
+        
+        alertController.addAction(presentPhoto)
+        alertController.addAction(presentVideo)
+        
+        present(alertController, animated: true)
+    }
 
     // MARK: - Configuration
     @objc
-    func showPicker() {
+    func showPicker(_ screen: String) {
+        var presentScreen = YPPickerScreen.video
+        if (screen == "photo") {
+            presentScreen = .photo
+        }
 
         var config = YPImagePickerConfiguration()
 
@@ -117,11 +140,11 @@ class ExampleViewController: UIViewController {
 
         /* Defines which screen is shown at launch. Video mode will only work if `showsVideo = true`.
            Default value is `.photo` */
-        config.startOnScreen = .video
+        config.startOnScreen = presentScreen
 
         /* Defines which screens are shown at launch, and their order.
            Default value is `[.library, .photo]` */
-        config.screens = [.video]
+        config.screens = [presentScreen]
 
         /* Can forbid the items with very big height with this property */
         config.library.minWidthForItem = UIScreen.main.bounds.width * 0.8
@@ -185,7 +208,7 @@ class ExampleViewController: UIViewController {
         //config.library.options = options
 
         let fetchOptions = PHFetchOptions()
-        fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.video.rawValue)
+        fetchOptions.predicate = NSPredicate(format: "mediaType = %d", presentScreen == .video ? PHAssetMediaType.video.rawValue : PHAssetMediaType.image.rawValue)
         config.library.options = fetchOptions
         config.library.preselectedItems = selectedItems
 
