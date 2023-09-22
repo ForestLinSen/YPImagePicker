@@ -249,12 +249,17 @@ internal final class YPLibraryVC: UIViewController, YPPermissionCheckable {
         let firstAsset = mediaManager.getAsset(at: 0) {
             changeAsset(firstAsset)
             v.collectionView.reloadData()
-            v.collectionView.selectItem(at: IndexPath(row: 0, section: 0),
-                                        animated: false,
-                                        scrollPosition: UICollectionView.ScrollPosition())
-            if !isMultipleSelectionEnabled && YPConfig.library.preSelectItemOnMultipleSelection {
-                addToSelection(indexPath: IndexPath(row: 0, section: 0))
+            
+            if(v.collectionView.numberOfItems(inSection: 0) > 0) {
+                v.collectionView.selectItem(at: IndexPath(row: 0, section: 0),
+                                            animated: false,
+                                            scrollPosition: UICollectionView.ScrollPosition())
+                if !isMultipleSelectionEnabled && YPConfig.library.preSelectItemOnMultipleSelection {
+                    addToSelection(indexPath: IndexPath(row: 0, section: 0))
+                }
             }
+            
+            
         } else {
             delegate?.libraryViewHaveNoItems()
         }

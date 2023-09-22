@@ -68,9 +68,12 @@ extension YPLibraryVC {
             // Replace the current selected image with the previously selected one
             if let previouslySelectedIndexPath = selectedIndexPaths.last {
                 v.collectionView.deselectItem(at: indexPath, animated: false)
-                v.collectionView.selectItem(at: previouslySelectedIndexPath, animated: false, scrollPosition: [])
-                currentlySelectedIndex = previouslySelectedIndexPath.row
-                changeAsset(mediaManager.getAsset(at: previouslySelectedIndexPath.row))
+                if(v.collectionView.numberOfItems(inSection: 0) > 0){
+                    v.collectionView.selectItem(at: previouslySelectedIndexPath, animated: false, scrollPosition: [])
+                    currentlySelectedIndex = previouslySelectedIndexPath.row
+                    changeAsset(mediaManager.getAsset(at: previouslySelectedIndexPath.row))
+                }
+                
             }
 			
             checkLimit()
